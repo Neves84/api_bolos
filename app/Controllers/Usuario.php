@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Controllers;
 
+
+namespace App\Controllers;
 use Firebase\JWT\JWT;
 use Exception;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\API\ResponseTrait;
-use App\Models\ClienteModel;
+use App\Models\UsuarioModel;
 
-class Clientes extends ResourceController
+class Usuario extends ResourceController
 {
     use ResponseTrait;
     private function getKey()
@@ -16,8 +17,63 @@ class Clientes extends ResourceController
         return "minha_chave_super_secreta654987lkhj231kuh";
     }
 
-    
-    // lista todos Clientes
+    public function login()
+    {
+        $userModel = new UsuarioModel();
+
+        $userdata = $userModel->where("user", $this->request->getVar("user"))->first();
+
+        if (!empty($userdata)) {
+
+            if ($this->request->getVar("passwd") == $userdata['passwd']) {
+
+                $key = $this->getKey();
+
+                $iat = time(); // retorna em timestamp
+                $nbf = $iat + 1;
+                $exp = $iat + 3600;
+
+                $payload = array(
+                    "iss" => "api_livro",
+                    "aud" => "diversos_app",
+                    "iat" => $iat, // issued at
+                    "nbf" => $nbf, //not before in seconds
+                    "exp" => $exp, // expire time in seconds
+                    
+                );
+
+                $token = JWT::encode($payload, $key);
+
+                $response = [
+                    'status' => 200,
+                    'error' => false,
+                    'messages' => 'Usuário logado com sucesso',
+                    'data' => [
+                        'token' => $token
+                    ]
+                ];
+                return $this->respondCreated($response);
+            } else {
+
+                $response = [
+                    'status' => 500,
+                    'error' => true,
+                    'messages' => 'Login inválido',
+                    'data' => []
+                ];
+                return $this->respondCreated($response);
+            }
+        } else {
+            $response = [
+                'status' => 500,
+                'error' => true,
+                'messages' => 'Login inválido',
+                'data' => []
+            ];
+            return $this->respondCreated($response);
+        }
+    }
+    // lista todos Usuarios
     public function index()
     {
         try {
@@ -25,7 +81,7 @@ class Clientes extends ResourceController
             $decoded = JWT::decode($token, $this->getKey(), array("HS256"));
 
             if ($decoded) {
-                $model = new ClienteModel();
+                $model = new UsuarioModel();
                 $data = $model->findAll();
                 return $this->respond($data);
             }
@@ -34,10 +90,10 @@ class Clientes extends ResourceController
         }
     }
 
-    // lista um Cliente
+    // lista um Usuario 
     public function show($id = null)
     {
-        $model = new ClienteModel();
+        $model = new UsuarioModel();
         $data = $model->getWhere(['id' => $id])->getResult();
 
         if ($data) {
@@ -47,10 +103,10 @@ class Clientes extends ResourceController
         return $this->failNotFound('Nenhum dado encontrado com id ' . $id);
     }
 
-    // adiciona um Cliente
+    // adiciona um Usuario
     public function create()
     {
-        $model = new ClienteModel();
+        $model = new UsuarioModel();
         $data = $this->request->getJSON();
 
         if ($model->insert($data)) {
@@ -67,10 +123,10 @@ class Clientes extends ResourceController
         return $this->fail($model->errors());
     }
 
-    // atualiza um Cliente
+    // atualiza um Usuario
     public function update($id = null)
     {
-        $model = new ClienteModel();
+        $model = new UsuarioModel();
         $data = $this->request->getJSON();
 
         if ($model->update($id, $data)) {
@@ -87,10 +143,10 @@ class Clientes extends ResourceController
         return $this->fail($model->errors());
     }
 
-    // deleta um Cliente
+    // deleta um Usuario
     public function delete($id = null)
     {
-        $model = new ClienteModel();
+        $model = new UsuarioModel();
         $data = $model->find($id);
 
         if ($data) {

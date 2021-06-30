@@ -8,12 +8,12 @@ class ClienteModel extends Model
     protected $primaryKey = 'id';
     protected $allowedFields = ['nome', 'telefone', 'endereco', 'email', 'cpf' ,'login' ,'senha'];
     protected $validationRules    = [
-        'nome'     => 'required|',
-        'telefone' => 'required|',
-        'endereco' => 'required|',
-        'email'    => 'required|',
-        'cpf'      => 'required|',
-        'login'    => 'required|',
-        'senha'    => 'required|'       
+        'nome'             => 'required|',
+        'telefone'         => 'required|',
+        'endereco'         => 'required|',
+        'email'            => 'required|',
+        'cpf'              => 'required|',
+        'login'            => 'required|',
+        'senha'            => 'required|'       
     ];
 }
